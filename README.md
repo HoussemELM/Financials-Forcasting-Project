@@ -165,7 +165,7 @@ financial-forecasting-dashboard/
 
 ## Portfolio & Demo
 
-* GitHub Repository:
+* GitHub Repository: [Financials Forcasting For Toyota sales](https://github.com/HoussemELM/Financials-Forcasting-Project)
 * Live Dashboard: [Streamlit App Link](#)
 * Demo Video: [YouTube/Loom Link](#)
 
