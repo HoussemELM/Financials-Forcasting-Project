@@ -165,7 +165,7 @@ financial-forecasting-dashboard/
 
 ## Portfolio & Demo
 
-* GitHub Repository: [https://github.com/HoussemELM/financial-forecasting-dashboard](https://github.com/HoussemELM/financial-forecasting-project)
+* GitHub Repository: [https://github.com/HoussemELM/financial-forecasting-dashboard]([https://github.com/HoussemELM/financial-forecasting-project](https://github.com/HoussemELM/Financials-Forcasting-Project))
 * Live Dashboard: [Streamlit App Link](#)
 * Demo Video: [YouTube/Loom Link](#)
 
