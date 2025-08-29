@@ -373,24 +373,16 @@ def create_regression_model(df, loaded_models=None):
         
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
-        # Scale features
         scaler = StandardScaler()
         X_train_scaled = scaler.fit_transform(X_train)
         X_test_scaled = scaler.transform(X_test)
-        
-        # Train model
         model = LinearRegression()
         model.fit(X_train_scaled, y_train)
-        
-        # Predictions
         y_pred = model.predict(X_test_scaled)
-        
-        # Metrics
         mae = mean_absolute_error(y_test, y_pred)
         rmse = np.sqrt(mean_squared_error(y_test, y_pred))
         mape = np.mean(np.abs((y_test - y_pred) / y_test)) * 100
         feature_importance = dict(zip(features, model.coef_))
-        
         return {
             'model': model,
             'scaler': scaler,
@@ -404,29 +396,20 @@ def create_regression_model(df, loaded_models=None):
         }
 
 def calculate_financial_metrics(df):
-    """Calculate key financial metrics and KPIs"""
     
     current_price = df['Close'].iloc[-1]
     prev_price = df['Close'].iloc[-2] if len(df) > 1 else current_price
     
-    # Price metrics
     daily_change = current_price - prev_price
     daily_change_pct = (daily_change / prev_price) * 100 if prev_price != 0 else 0
     
-    # Volatility metrics
     volatility_30d = df['Close'].tail(30).std()
-    volatility_annual = volatility_30d * np.sqrt(252)  # Annualized
-    
-    # Volume metrics
+    volatility_annual = volatility_30d * np.sqrt(252) 
     avg_volume = df['Volume'].mean()
     current_volume = df['Volume'].iloc[-1]
     volume_ratio = current_volume / avg_volume if avg_volume != 0 else 0
-    
-    # Price range metrics
     price_range = df['High'].max() - df['Low'].min()
     current_position = (current_price - df['Low'].min()) / price_range if price_range != 0 else 0
-    
-    # Return the metrics dictionary
     return {
         'current_price': current_price,
         'daily_change': daily_change,
@@ -440,18 +423,12 @@ def calculate_financial_metrics(df):
     }
     
 def create_prophet_forecast(data, periods=30, loaded_models=None):
-    """Create Prophet forecast using pre-trained model"""
     try:
         if loaded_models and 'prophet_model' in loaded_models:
-            # Use your pre-trained Prophet model
             prophet_model = loaded_models['prophet_model']
             st.success("✅ Using pre-trained Prophet model")
-            
-            # Create future dataframe
             future = prophet_model.make_future_dataframe(periods=periods)
             forecast = prophet_model.predict(future)
-            
-            # Get only the forecast part (future dates)
             forecast_future = forecast.tail(periods)
             
             return {
@@ -480,46 +457,27 @@ def main():
     This comprehensive dashboard provides deep insights into financial time series data with professional-grade forecasting models, 
     technical analysis, and key performance indicators for informed decision-making.
     """)
-    
-    # Sidebar
     st.sidebar.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
     st.sidebar.header("📊 Dashboard Controls")
-    
-    # Load pre-trained models from files
     loaded_models_from_files = load_models_from_files()
-    
-    # Upload interface for models
     uploaded_models = upload_models_interface()
-    
-    # Combine loaded and uploaded models
     loaded_models = {**loaded_models_from_files, **uploaded_models}
-    
     model_status = display_model_status(loaded_models)
-    
-    # File upload
     uploaded_file = st.sidebar.file_uploader("Upload your financial dataset", 
                                            type=["csv"], 
                                            help="Upload CSV file with Date, Open, Close, High, Low, Volume columns")
-    
     if uploaded_file is not None:
-        # Load and process data
         try:
             df = pd.read_csv(uploaded_file)
             df['Date'] = pd.to_datetime(df['Date'])
             df = df.sort_values('Date').reset_index(drop=True)
-            
-            # Data validation
             required_columns = ['Date', 'Open', 'Close', 'High', 'Low', 'Volume']
             missing_columns = [col for col in required_columns if col not in df.columns]
             
             if missing_columns:
                 st.error(f"Missing required columns: {missing_columns}")
                 st.stop()
-            
-            # Calculate technical indicators
             df = calculate_technical_indicators(df)
-            
-            # Sidebar controls
             st.sidebar.markdown("### 📅 Date Range Selection")
             date_range = st.sidebar.date_input(
                 "Select date range",
@@ -539,13 +497,8 @@ def main():
             
             st.sidebar.markdown('</div>', unsafe_allow_html=True)
             
-            # Main content
             col1, col2, col3 = st.columns(3)
-            
-            # Calculate metrics
             metrics = calculate_financial_metrics(df_filtered)
-            
-            # KPI Cards
             with col1:
                 st.markdown(f"""
                 <div class="kpi-card">
@@ -573,20 +526,17 @@ def main():
                 </div>
                 """, unsafe_allow_html=True)
             
-            # Tabs for different analyses
             tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 Price Analysis", "🔮 Forecasting", "📊 Technical Analysis", "📋 Statistics", "📤 Export"])
             
             with tab1:
                 st.subheader("📈 Comprehensive Price Analysis")
                 
-                # Interactive price chart
                 fig = make_subplots(rows=2, cols=1, 
                                   shared_xaxes=True,
                                   vertical_spacing=0.1,
                                   subplot_titles=('Price Movement with Technical Indicators', 'Volume Analysis'),
                                   row_heights=[0.7, 0.3])
                 
-                # Price data
                 fig.add_trace(go.Candlestick(
                     x=df_filtered['Date'],
                     open=df_filtered['Open'],
@@ -596,7 +546,6 @@ def main():
                     name="Price"
                 ), row=1, col=1)
                 
-                # Moving averages
                 fig.add_trace(go.Scatter(
                     x=df_filtered['Date'],
                     y=df_filtered['MA_20'],
